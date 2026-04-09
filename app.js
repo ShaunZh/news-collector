@@ -88,14 +88,13 @@ function renderDateList() {
 
     return `
       <div class="date-item p-3 border-b cursor-pointer flex justify-between items-center"
-           data-date="${day.date}"
-           onclick="selectDate('${day.date}')">
+           data-date="${escapeHtmlAttr(day.date)}">
         <div>
           <div class="font-medium text-sm">${formatDate(day.date)}</div>
           <div class="text-xs text-gray-500">${substantiveCount} tweets, ${day.stats?.podcastsCount || 0} podcasts</div>
         </div>
-        <button class="text-red-500 hover:text-red-700 text-xs px-2"
-                onclick="event.stopPropagation(); deleteDay('${day.date}')">
+        <button class="delete-day-btn text-red-500 hover:text-red-700 text-xs px-2"
+                data-date="${escapeHtmlAttr(day.date)}">
           Delete
         </button>
       </div>
@@ -212,13 +211,14 @@ function renderContent() {
 
 function renderTweets(tweets) {
   return tweets.map(tweet => `
-    <div class="tweet-card bg-white rounded p-3 mb-2 border ${tweet.isSubstantive ? '' : 'opacity-60'}">
+    <div class="tweet-card bg-white rounded p-3 mb-2 border ${tweet.isSubstantive ? '' : 'opacity-60'}"
+         data-tweet-id="${escapeHtmlAttr(tweet.id)}">
       <div class="flex justify-between">
         <p class="text-sm text-gray-700 flex-1">${escapeHtml(tweet.text)}</p>
-        <button class="text-red-400 hover:text-red-600 text-xs ml-2"
-                onclick="deleteTweet('${tweet.id}')">×</button>
+        <button class="delete-tweet-btn text-red-400 hover:text-red-600 text-xs ml-2"
+                data-id="${escapeHtmlAttr(tweet.id)}">×</button>
       </div>
-      <a href="${tweet.url}" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 block">
+      <a href="${sanitizeUrl(tweet.url)}" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 block">
         View on X →
       </a>
       ${!tweet.isSubstantive ? '<span class="text-xs text-gray-400 mt-1 block">Filtered (low-value)</span>' : ''}
@@ -227,17 +227,19 @@ function renderTweets(tweets) {
 }
 
 function renderPodcast(podcast) {
+  const podcastId = escapeHtmlAttr(podcast.guid || podcast.url);
   return `
-    <div class="bg-white rounded p-4 mb-3 border">
+    <div class="podcast-card bg-white rounded p-4 mb-3 border"
+         data-podcast-id="${podcastId}">
       <div class="flex justify-between items-start">
         <div class="flex-1">
           <h3 class="font-medium text-gray-800">${escapeHtml(podcast.name)}</h3>
           <p class="text-sm text-gray-600 mt-1">${escapeHtml(podcast.title)}</p>
         </div>
-        <button class="text-red-400 hover:text-red-600 text-xs ml-2"
-                onclick="deletePodcast('${podcast.guid || podcast.url}')">×</button>
+        <button class="delete-podcast-btn text-red-400 hover:text-red-600 text-xs ml-2"
+                data-id="${podcastId}">×</button>
       </div>
-      <a href="${podcast.url}" target="_blank" class="text-sm text-blue-500 hover:underline mt-2 block">
+      <a href="${sanitizeUrl(podcast.url)}" target="_blank" class="text-sm text-blue-500 hover:underline mt-2 block">
         Listen →
       </a>
       <details class="mt-2">
@@ -251,17 +253,19 @@ function renderPodcast(podcast) {
 }
 
 function renderBlog(blog) {
+  const blogUrl = escapeHtmlAttr(blog.url);
   return `
-    <div class="bg-white rounded p-4 mb-3 border">
+    <div class="blog-card bg-white rounded p-4 mb-3 border"
+         data-blog-url="${blogUrl}">
       <div class="flex justify-between items-start">
         <div class="flex-1">
           <h3 class="font-medium text-gray-800">${escapeHtml(blog.name || 'Blog')}</h3>
           <p class="text-sm text-gray-600 mt-1">${escapeHtml(blog.title)}</p>
         </div>
-        <button class="text-red-400 hover:text-red-600 text-xs ml-2"
-                onclick="deleteBlog('${blog.url}')">×</button>
+        <button class="delete-blog-btn text-red-400 hover:text-red-600 text-xs ml-2"
+                data-url="${blogUrl}">×</button>
       </div>
-      <a href="${blog.url}" target="_blank" class="text-sm text-blue-500 hover:underline mt-2 block">
+      <a href="${sanitizeUrl(blog.url)}" target="_blank" class="text-sm text-blue-500 hover:underline mt-2 block">
         Read →
       </a>
     </div>
@@ -274,6 +278,30 @@ function escapeHtml(text) {
              .replace(/</g, '&lt;')
              .replace(/>/g, '&gt;')
              .replace(/"/g, '&quot;');
+}
+
+function escapeHtmlAttr(text) {
+  if (!text) return '';
+  // More aggressive escaping for data attributes - also escape single quotes
+  return text.replace(/&/g, '&amp;')
+             .replace(/</g, '&lt;')
+             .replace(/>/g, '&gt;')
+             .replace(/"/g, '&quot;')
+             .replace(/'/g, '&#39;');
+}
+
+function sanitizeUrl(url) {
+  if (!url) return '';
+  // Only allow http/https URLs
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return url;
+    }
+  } catch {
+    // Invalid URL
+  }
+  return '#';
 }
 
 // ============ Builder Filter and Search ============
@@ -364,5 +392,36 @@ function saveCurrentData() {
 }
 
 // ============ Initialize ============
+
+// Event delegation for dynamic elements
+document.getElementById('dateList').addEventListener('click', (e) => {
+  const dateItem = e.target.closest('.date-item');
+  if (dateItem && !e.target.closest('.delete-day-btn')) {
+    selectDate(dateItem.dataset.date);
+  }
+
+  const deleteBtn = e.target.closest('.delete-day-btn');
+  if (deleteBtn) {
+    e.stopPropagation();
+    deleteDay(deleteBtn.dataset.date);
+  }
+});
+
+document.getElementById('contentArea').addEventListener('click', (e) => {
+  const deleteTweetBtn = e.target.closest('.delete-tweet-btn');
+  if (deleteTweetBtn) {
+    deleteTweet(deleteTweetBtn.dataset.id);
+  }
+
+  const deletePodcastBtn = e.target.closest('.delete-podcast-btn');
+  if (deletePodcastBtn) {
+    deletePodcast(deletePodcastBtn.dataset.id);
+  }
+
+  const deleteBlogBtn = e.target.closest('.delete-blog-btn');
+  if (deleteBlogBtn) {
+    deleteBlog(deleteBlogBtn.dataset.url);
+  }
+});
 
 loadAllData();
