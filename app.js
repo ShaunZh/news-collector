@@ -75,11 +75,11 @@ function renderDateList() {
   const container = document.getElementById('dateList');
 
   if (allData.length === 0) {
-    container.innerHTML = '<div class="p-3"><h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">History</h2></div><div class="p-2 text-sm text-slate-400">No data available</div>';
+    container.innerHTML = '<div class="p-4"><h2 class="text-[11px] font-semibold text-slate-400 uppercase tracking-widest mb-3">History</h2></div><div class="px-2 text-sm text-slate-400">No data available</div>';
     return;
   }
 
-  let html = '<div class="p-3"><h2 class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2 px-2">History</h2></div>';
+  let html = '<div class="p-4"><h2 class="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">History</h2></div>';
 
   html += allData.map(day => {
     const tweetCount = day.tweets.reduce((sum, b) => sum + b.tweets.length, 0);
@@ -88,16 +88,16 @@ function renderDateList() {
     const isActive = currentData?.date === day.date;
 
     return `
-      <div class="date-item px-3 py-2 mx-2 rounded-lg cursor-pointer flex justify-between items-center group ${isActive ? 'active' : ''}"
+      <div class="date-item px-4 py-3 mx-2 rounded-xl cursor-pointer flex justify-between items-center group mb-1 ${isActive ? 'active' : ''}"
            data-date="${escapeHtmlAttr(day.date)}">
         <div class="flex-1 min-w-0">
-          <div class="font-medium text-sm text-slate-700 dark:text-slate-200">${formatDate(day.date)}</div>
+          <div class="font-semibold text-sm text-slate-700 dark:text-slate-200">${formatDate(day.date)}</div>
           <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
             <span>${substantiveCount} posts</span>
-            ${podcastCount > 0 ? `<span class="text-purple-500">• ${podcastCount} 🎧</span>` : ''}
+            ${podcastCount > 0 ? `<span class="text-purple-500 font-medium">${podcastCount} podcast${podcastCount > 1 ? 's' : ''}</span>` : ''}
           </div>
         </div>
-        <button class="delete-day-btn opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 p-1 transition-all"
+        <button class="delete-day-btn opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
                 data-date="${escapeHtmlAttr(day.date)}" title="Delete">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -140,7 +140,7 @@ function renderContent() {
   const container = document.getElementById('contentArea');
 
   if (!currentData) {
-    container.innerHTML = '<div class="max-w-4xl mx-auto p-8"><div class="text-slate-400 text-center py-16">Select a date to view content</div></div>';
+    container.innerHTML = '<div class="p-8"><div class="text-slate-400 text-center py-20">Select a date to view content</div></div>';
     return;
   }
 
@@ -164,17 +164,17 @@ function renderContent() {
 
   const totalTweets = filteredBuilders.reduce((sum, b) => sum + b.tweets.filter(t => t.isSubstantive).length, 0);
 
-  let html = '<div class="max-w-4xl mx-auto p-8">';
+  let html = '<div class="p-8">';
 
   // Page header
   html += `
     <div class="mb-8">
-      <h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">${formatDate(currentData.date)}</h2>
+      <h2 class="text-3xl font-bold text-slate-800 dark:text-white tracking-tight">${formatDate(currentData.date)}</h2>
       <p class="text-slate-500 dark:text-slate-400 mt-1">${totalTweets} posts from ${filteredBuilders.length} builders</p>
     </div>
   `;
 
-  // Tweets
+  // Tweets - Two column grid
   if (filteredBuilders.length > 0) {
     filteredBuilders.forEach(builder => {
       html += renderBuilder(builder);
@@ -184,20 +184,24 @@ function renderContent() {
   // Blogs in main content
   if (currentData.blogs && currentData.blogs.length > 0) {
     html += `
-      <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
-        <h3 class="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
-          </svg>
-          Blogs
+      <div class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
+        <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+          <div class="w-8 h-8 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+          </div>
+          Blog Posts
         </h3>
-        ${currentData.blogs.map(blog => renderBlog(blog)).join('')}
+        <div class="tweets-grid">
+          ${currentData.blogs.map(blog => renderBlog(blog)).join('')}
+        </div>
       </div>
     `;
   }
 
   if (filteredBuilders.length === 0) {
-    html += '<div class="text-slate-400 text-center py-16">No matching content found</div>';
+    html += '<div class="text-slate-400 text-center py-20">No matching content found</div>';
   }
 
   html += '</div>';
@@ -208,7 +212,7 @@ function renderPodcasts() {
   const container = document.getElementById('podcastList');
 
   if (!currentData || !currentData.podcasts || currentData.podcasts.length === 0) {
-    container.innerHTML = '<div class="text-sm text-slate-400 text-center py-8">No podcasts</div>';
+    container.innerHTML = '<div class="text-sm text-slate-400 text-center py-12">No podcasts available</div>';
     return;
   }
 
@@ -221,30 +225,33 @@ function renderBuilder(builder) {
   const initials = builder.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   let html = `
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-4">
+    <div class="mb-10">
+      <!-- Builder Header -->
+      <div class="builder-header flex items-center gap-4 mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div class="builder-avatar">${initials}</div>
         <div class="flex-1">
-          <div class="font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(builder.name)}</div>
-          <div class="text-sm text-slate-400">@${escapeHtml(builder.handle)}</div>
+          <div class="font-bold text-lg text-slate-800 dark:text-white">${escapeHtml(builder.name)}</div>
+          <div class="text-sm text-slate-400 font-medium">@${escapeHtml(builder.handle)}</div>
         </div>
-        <div class="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
-          ${substantiveTweets.length}
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-bold gradient-text">${substantiveTweets.length}</span>
+          <span class="text-xs text-slate-400 uppercase tracking-wide">posts</span>
         </div>
+      </div>
+
+      <!-- Tweets Grid -->
+      <div class="tweets-grid">
+        ${substantiveTweets.map(tweet => renderTweet(tweet, true)).join('')}
       </div>
   `;
 
-  substantiveTweets.forEach(tweet => {
-    html += renderTweet(tweet, true);
-  });
-
   if (lowValueTweets.length > 0) {
     html += `
-      <details class="mt-3">
-        <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-500 select-none ml-1">
-          +${lowValueTweets.length} filtered
+      <details class="mt-4 ml-1">
+        <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-500 select-none font-medium">
+          +${lowValueTweets.length} filtered (low-value)
         </summary>
-        <div class="mt-2 space-y-2 opacity-60">
+        <div class="mt-3 tweets-grid opacity-50">
           ${lowValueTweets.map(t => renderTweet(t, false)).join('')}
         </div>
       </details>
@@ -257,28 +264,28 @@ function renderBuilder(builder) {
 
 function renderTweet(tweet, isSubstantive) {
   const text = formatTweetText(tweet.text);
-  const isLong = tweet.text.length > 300;
+  const isLong = tweet.text.length > 250;
 
   return `
-    <div class="card bg-white dark:bg-slate-800 rounded-2xl p-5 mb-3 border border-slate-100 dark:border-slate-700 shadow-sm"
+    <div class="card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800"
          data-tweet-id="${escapeHtmlAttr(tweet.id)}">
       <div class="flex gap-3">
         <div class="flex-1 min-w-0">
-          <p class="tweet-text text-slate-700 dark:text-slate-200 text-[15px] leading-relaxed ${isLong ? 'line-clamp-5' : ''}" id="tweet-${escapeHtmlAttr(tweet.id)}">
+          <p class="tweet-text text-slate-600 dark:text-slate-300 ${isLong ? 'line-clamp-4' : ''}" id="tweet-${escapeHtmlAttr(tweet.id)}">
             ${text}
           </p>
           ${isLong ? `
-            <button class="text-indigo-500 hover:text-indigo-600 text-sm mt-2 flex items-center gap-1" onclick="toggleExpand('${escapeHtmlAttr(tweet.id)}')">
-              <span class="expand-text">Show more</span>
+            <button class="text-purple-500 hover:text-purple-600 text-xs mt-2 font-medium flex items-center gap-1" onclick="toggleExpand('${escapeHtmlAttr(tweet.id)}')">
+              <span class="expand-text">Read more</span>
               <svg class="w-3 h-3 expand-icon transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
             </button>
           ` : ''}
-          <div class="mt-3 flex items-center">
+          <div class="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800">
             <a href="${sanitizeUrl(tweet.url)}" target="_blank"
-               class="text-sm text-slate-400 hover:text-indigo-500 flex items-center gap-1.5 transition-colors">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+               class="text-xs text-slate-400 hover:text-purple-500 flex items-center gap-1.5 transition-colors font-medium">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
               View on X
@@ -298,38 +305,53 @@ function renderTweet(tweet, isSubstantive) {
 
 function renderPodcast(podcast) {
   const podcastId = escapeHtmlAttr(podcast.guid || podcast.url);
+  const transcriptPreview = podcast.transcript?.slice(0, 8000) || 'No transcript available';
+
   return `
-    <div class="podcast-card rounded-2xl p-4 mb-3"
+    <div class="podcast-card rounded-2xl overflow-hidden mb-4"
          data-podcast-id="${podcastId}">
-      <div class="flex items-start gap-3">
-        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h4 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">${escapeHtml(podcast.name)}</h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">${escapeHtml(podcast.title)}</p>
-          <a href="${sanitizeUrl(podcast.url)}" target="_blank"
-             class="text-xs text-indigo-500 hover:text-indigo-600 mt-2 inline-flex items-center gap-1">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+      <!-- Header -->
+      <div class="p-4">
+        <div class="flex items-start gap-3">
+          <div class="w-12 h-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
             </svg>
-            Listen
-          </a>
-          <details class="mt-2">
-            <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-500 select-none">Transcript</summary>
-            <div class="mt-2 text-xs text-slate-600 dark:text-slate-300 bg-white/50 dark:bg-slate-900/50 rounded-lg p-3 max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
-              ${escapeHtml(podcast.transcript?.slice(0, 5000) || 'No transcript')}${podcast.transcript && podcast.transcript.length > 5000 ? '...' : ''}
-            </div>
-          </details>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-slate-800 dark:text-white">${escapeHtml(podcast.name)}</h4>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">${escapeHtml(podcast.title)}</p>
+          </div>
+          <button class="delete-btn delete-podcast-btn text-slate-300 hover:text-red-500 p-1 rounded"
+                  data-id="${podcastId}" title="Delete">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
-        <button class="delete-btn delete-podcast-btn text-slate-300 hover:text-red-500 p-1 rounded"
-                data-id="${podcastId}" title="Delete">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+
+        <a href="${sanitizeUrl(podcast.url)}" target="_blank"
+           class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
           </svg>
-        </button>
+          Listen Now
+        </a>
+      </div>
+
+      <!-- Transcript -->
+      <div class="border-t border-purple-100 dark:border-purple-900/50 p-4 bg-white/50 dark:bg-slate-900/50">
+        <details open>
+          <summary class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 select-none flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Transcript
+          </summary>
+          <div class="transcript-area mt-3 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 whitespace-pre-wrap">
+            ${escapeHtml(transcriptPreview)}${podcast.transcript && podcast.transcript.length > 8000 ? '\n\n... (truncated)' : ''}
+          </div>
+        </details>
       </div>
     </div>
   `;
@@ -338,19 +360,19 @@ function renderPodcast(podcast) {
 function renderBlog(blog) {
   const blogUrl = escapeHtmlAttr(blog.url);
   return `
-    <div class="card bg-white dark:bg-slate-800 rounded-2xl p-5 mb-3 border border-slate-100 dark:border-slate-700 shadow-sm"
+    <div class="card bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-100 dark:border-slate-800"
          data-blog-url="${blogUrl}">
       <div class="flex items-start gap-4">
-        <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(blog.name || 'Blog')}</h3>
+          <h3 class="font-bold text-slate-800 dark:text-white">${escapeHtml(blog.name || 'Blog')}</h3>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">${escapeHtml(blog.title)}</p>
           <a href="${sanitizeUrl(blog.url)}" target="_blank"
-             class="mt-3 text-sm text-indigo-500 hover:text-indigo-600 inline-flex items-center gap-1">
+             class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
             </svg>
@@ -384,13 +406,13 @@ function toggleExpand(tweetId) {
   const textSpan = btn.querySelector('.expand-text');
   const icon = btn.querySelector('.expand-icon');
 
-  if (tweetEl.classList.contains('line-clamp-5')) {
-    tweetEl.classList.remove('line-clamp-5');
+  if (tweetEl.classList.contains('line-clamp-4')) {
+    tweetEl.classList.remove('line-clamp-4');
     textSpan.textContent = 'Show less';
     icon.style.transform = 'rotate(180deg)';
   } else {
-    tweetEl.classList.add('line-clamp-5');
-    textSpan.textContent = 'Show more';
+    tweetEl.classList.add('line-clamp-4');
+    textSpan.textContent = 'Read more';
     icon.style.transform = '';
   }
 }
