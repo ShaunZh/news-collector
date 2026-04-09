@@ -19,7 +19,7 @@ Extract video ID from the YouTube URL:
 - `youtu.be/xxx`
 - `youtube.com/embed/xxx`
 
-Check if video already exists in `videos/*-videoId.json`:
+Check if video already exists in `videos/YYYY-MM-DD-videoId.json`:
 - If exists, inform user and ask if they want to regenerate
 - If not, proceed to fetch
 
