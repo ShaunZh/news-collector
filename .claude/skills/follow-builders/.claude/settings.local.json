@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openclaw pairing:*)",
+      "Bash(openclaw logs:*)",
+      "Bash(pkill -f \"openclaw logs\")",
+      "Bash(openclaw config:*)",
+      "Read(//Users/zhangjie/.openclaw/**)",
+      "Read(//Users/zhangjie/.config/openclaw/**)",
+      "Bash(openclaw session:*)",
+      "Bash(openclaw status:*)",
+      "Bash(node:*)",
+      "Bash(open:*)",
+      "Bash(chmod +x generate-enhanced-html.js)"
+    ]
+  }
+}
