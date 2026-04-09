@@ -2,16 +2,13 @@
 
 // Fetch YouTube video info and subtitles using yt-dlp
 
-import { writeFile, mkdir, access, readFile } from 'fs/promises';
+import { writeFile, mkdir, readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { spawn } from 'child_process';
 import { tmpdir } from 'os';
-import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
-const path = require('path');
-
+const YOUTUBE_VIDEO_ID_LENGTH = 11;
 const SCRIPT_DIR = dirname(new URL(import.meta.url).pathname);
 const PROJECT_DIR = join(SCRIPT_DIR, '..', '..', '..', '..');
 const VIDEOS_DIR = join(PROJECT_DIR, 'videos');
@@ -19,8 +16,8 @@ const VIDEOS_DIR = join(PROJECT_DIR, 'videos');
 // Parse YouTube URL to extract video ID
 function extractVideoId(url) {
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /^([a-zA-Z0-9_-]{11})$/
+    new RegExp(`(?:youtube\\.com/watch\\?v=|youtu\\.be/|youtube\\.com/embed/)([a-zA-Z0-9_-]{${YOUTUBE_VIDEO_ID_LENGTH}})`),
+    new RegExp(`^([a-zA-Z0-9_-]{${YOUTUBE_VIDEO_ID_LENGTH}})$`)
   ];
 
   for (const pattern of patterns) {
