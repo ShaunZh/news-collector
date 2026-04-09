@@ -194,15 +194,35 @@ pip install yt-dlp
 
 视频数据保存到 `videos/YYYY-MM-DD-videoId.json`：
 
+**原始数据（fetch-youtube.js 获取）：**
+
 ```json
 {
   "videoId": "xxx",
+  "url": "https://www.youtube.com/watch?v=xxx",
   "title": "视频标题",
+  "description": "视频描述...",
   "channel": "频道名称",
+  "channelId": "UCxxx",
+  "publishedAt": "2026-04-09T00:00:00Z",
+  "duration": 1234,
+  "thumbnail": "https://...",
+  "chapters": [
+    { "title": "Introduction", "start": 0, "end": 120 }
+  ],
   "subtitles": {
-    "type": "manual|auto",
-    "transcript": "字幕文本..."
+    "type": "manual",
+    "language": "en",
+    "transcript": "完整字幕文本..."
   },
+  "fetchedAt": "2026-04-09T12:00:00Z"
+}
+```
+
+**摘要数据（AI 生成，保存在 summary 字段）：**
+
+```json
+{
   "summary": {
     "coreTopics": "...",
     "keyPoints": [...],
