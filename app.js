@@ -210,12 +210,15 @@ function renderContent() {
 
 function renderPodcasts() {
   const container = document.getElementById('podcastList');
+  const viewAllLink = document.getElementById('viewAllPodcasts');
 
   if (!currentData || !currentData.podcasts || currentData.podcasts.length === 0) {
     container.innerHTML = '<div class="text-sm text-slate-400 text-center py-12">No podcasts available</div>';
+    if (viewAllLink) viewAllLink.classList.add('hidden');
     return;
   }
 
+  if (viewAllLink) viewAllLink.classList.remove('hidden');
   container.innerHTML = currentData.podcasts.map(podcast => renderPodcast(podcast)).join('');
 }
 
@@ -305,55 +308,24 @@ function renderTweet(tweet, isSubstantive) {
 
 function renderPodcast(podcast) {
   const podcastId = escapeHtmlAttr(podcast.guid || podcast.url);
-  const transcriptPreview = podcast.transcript?.slice(0, 8000) || 'No transcript available';
-
   return `
-    <div class="podcast-card rounded-2xl overflow-hidden mb-4"
-         data-podcast-id="${podcastId}">
-      <!-- Header -->
-      <div class="p-4">
-        <div class="flex items-start gap-3">
-          <div class="w-12 h-12 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-            </svg>
-          </div>
-          <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-slate-800 dark:text-white">${escapeHtml(podcast.name)}</h4>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">${escapeHtml(podcast.title)}</p>
-          </div>
-          <button class="delete-btn delete-podcast-btn text-slate-300 hover:text-red-500 p-1 rounded"
-                  data-id="${podcastId}" title="Delete">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-
-        <a href="${sanitizeUrl(podcast.url)}" target="_blank"
-           class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"/>
+    <a href="podcasts.html" class="podcast-card block rounded-xl p-3 hover:shadow-md transition-all cursor-pointer group"
+       data-podcast-id="${podcastId}">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
           </svg>
-          Listen Now
-        </a>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs text-purple-600 dark:text-purple-400 font-semibold">${escapeHtml(podcast.name)}</div>
+          <p class="text-sm text-slate-700 dark:text-slate-200 font-medium line-clamp-2 mt-0.5">${escapeHtml(podcast.title)}</p>
+        </div>
+        <svg class="w-4 h-4 text-slate-300 group-hover:text-purple-500 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
       </div>
-
-      <!-- Transcript -->
-      <div class="border-t border-purple-100 dark:border-purple-900/50 p-4 bg-white/50 dark:bg-slate-900/50">
-        <details open>
-          <summary class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 select-none flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Transcript
-          </summary>
-          <div class="transcript-area mt-3 text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 whitespace-pre-wrap">
-            ${escapeHtml(transcriptPreview)}${podcast.transcript && podcast.transcript.length > 8000 ? '\n\n... (truncated)' : ''}
-          </div>
-        </details>
-      </div>
-    </div>
+    </a>
   `;
 }
 
