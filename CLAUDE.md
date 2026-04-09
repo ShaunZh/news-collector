@@ -6,6 +6,12 @@ Local digest viewer for AI Builders content.
 
 - `/ai` or `/follow-builders` — Fetch latest data, save locally, and open browser viewer
 
+## Hook Configuration
+
+When `/ai` or `/follow-builders` is invoked in this project:
+1. Run `node .claude/skills/follow-builders-local/scripts/fetch-and-save.js`
+2. Open browser: `open index.html`
+
 ## Architecture
 
 - `data/` — Daily JSON files (YYYY-MM-DD.json)
