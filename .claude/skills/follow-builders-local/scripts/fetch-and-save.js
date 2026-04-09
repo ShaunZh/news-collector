@@ -93,5 +93,112 @@ function filterTweets(tweets) {
   }));
 }
 
+// ===================== SAVE/MERGE FUNCTIONS =====================
+
+async function loadExistingData(dateFile) {
+  if (existsSync(dateFile)) {
+    try {
+      const content = await readFile(dateFile, 'utf-8');
+      return JSON.parse(content);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function mergeData(existing, newData) {
+  if (!existing) return newData;
+
+  // Merge tweets by ID (avoid duplicates)
+  const existingTweetIds = new Set(existing.tweets.map(t => t.id));
+  const newTweets = newData.tweets.filter(t => !existingTweetIds.has(t.id));
+  const mergedTweets = [...existing.tweets, ...newTweets];
+
+  // Podcasts and blogs: replace if new data exists
+  return {
+    ...existing,
+    tweets: mergedTweets,
+    podcasts: newData.podcasts.length > 0 ? newData.podcasts : existing.podcasts,
+    blogs: newData.blogs.length > 0 ? newData.blogs : existing.blogs,
+    stats: newData.stats,
+    fetchedAt: new Date().toISOString()
+  };
+}
+
+// ===================== MAIN FUNCTION =====================
+
+async function main() {
+  console.log('Fetching AI Builders Digest data...');
+
+  await ensureDataDir();
+
+  // Fetch all feeds
+  const [feedX, feedPodcasts, feedBlogs] = await Promise.all([
+    fetchJSON(FEED_X_URL),
+    fetchJSON(FEED_PODCASTS_URL),
+    fetchJSON(FEED_BLOGS_URL)
+  ]);
+
+  if (!feedX) {
+    console.error('Failed to fetch tweet feed');
+    process.exit(1);
+  }
+
+  const today = getTodayDate();
+  const dateFile = join(DATA_DIR, `${today}.json`);
+
+  // Filter tweets
+  let totalTweets = 0;
+  let filteredTweets = 0;
+  const processedBuilders = [];
+
+  if (feedX.x) {
+    for (const builder of feedX.x) {
+      totalTweets += builder.tweets.length;
+      const filtered = filterTweets(builder.tweets);
+      filteredTweets += filtered.filter(t => t.isSubstantive).length;
+      processedBuilders.push({
+        name: builder.name,
+        handle: builder.handle,
+        bio: builder.bio,
+        tweets: filtered
+      });
+    }
+  }
+
+  // Build new data structure
+  const newData = {
+    date: today,
+    fetchedAt: new Date().toISOString(),
+    tweets: processedBuilders,
+    podcasts: feedPodcasts?.podcasts || [],
+    blogs: feedBlogs?.blogs || [],
+    stats: {
+      tweetsTotal: totalTweets,
+      tweetsFiltered: filteredTweets,
+      podcastsCount: feedPodcasts?.podcasts?.length || 0,
+      blogsCount: feedBlogs?.blogs?.length || 0
+    }
+  };
+
+  // Merge with existing if present
+  const existingData = await loadExistingData(dateFile);
+  const finalData = mergeData(existingData, newData);
+
+  // Save
+  await writeFile(dateFile, JSON.stringify(finalData, null, 2));
+  console.log(`Saved ${finalData.tweets.reduce((s, b) => s + b.tweets.length, 0)} tweets from ${finalData.tweets.length} builders to ${dateFile}`);
+  console.log(`Stats: ${totalTweets} total → ${filteredTweets} substantive`);
+
+  // Output path for caller to use
+  console.log(`DATA_FILE:${dateFile}`);
+}
+
+main().catch(err => {
+  console.error('Error:', err.message);
+  process.exit(1);
+});
+
 // Export for testing
-export { removeEmoji, isPolitenessOnly, hasLink, isSubstantiveTweet, filterTweets };
+export { isSubstantiveTweet, removeEmoji, isPolitenessOnly, loadExistingData, mergeData };
