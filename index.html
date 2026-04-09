@@ -195,6 +195,29 @@
       box-shadow: 0 6px 25px -4px rgba(139, 92, 246, 0.6);
     }
 
+    /* Video card styles */
+    .video-card {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.03) 0%, rgba(249, 115, 22, 0.03) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.1);
+    }
+    .dark .video-card {
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.15) 0%, rgba(83, 30, 10, 0.15) 100%);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .video-card:hover {
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 8px 30px -12px rgba(239, 68, 68, 0.2);
+    }
+
+    .video-button {
+      background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+      box-shadow: 0 4px 20px -4px rgba(239, 68, 68, 0.5);
+    }
+    .video-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px -4px rgba(239, 68, 68, 0.6);
+    }
+
     .line-clamp-4 {
       display: -webkit-box;
       -webkit-line-clamp: 4;
@@ -295,6 +318,15 @@
                 <span id="podcastCountBadge" class="ml-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300 rounded-full text-xs font-semibold hidden">0</span>
               </span>
             </button>
+            <button class="tab-btn" data-tab="videos">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                </svg>
+                Videos
+                <span id="videoCountBadge" class="ml-1 px-2 py-0.5 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 rounded-full text-xs font-semibold hidden">0</span>
+              </span>
+            </button>
           </div>
         </div>
 
@@ -311,6 +343,13 @@
           <div id="podcastsTab" class="tab-content">
             <div id="podcastsContent" class="p-8">
               <div class="text-slate-400 text-center py-20">No podcasts available</div>
+            </div>
+          </div>
+
+          <!-- Videos Tab -->
+          <div id="videosTab" class="tab-content">
+            <div id="videosContent" class="p-8">
+              <div class="text-slate-400 text-center py-20">No videos available</div>
             </div>
           </div>
         </div>
