@@ -11,6 +11,7 @@
 - 全文搜索
 - 删除内容
 - **Podcast AI 摘要**：自动提取核心观点、资源引用、精彩片段
+- **YouTube 视频总结**：下载视频字幕并生成 AI 摘要
 
 ## 快速开始
 
@@ -50,22 +51,29 @@ python3 -m http.server 8888
 ├── index.html                   # 前端页面
 ├── app.js                       # 前端逻辑
 ├── prompts/                     # AI 提示词
-│   └── podcast-summary.md       # Podcast 摘要生成提示词
+│   ├── podcast-summary.md       # Podcast 摘要生成提示词
+│   └── video-summary.md         # Video 摘要生成提示词
 ├── data/                        # 数据目录
 │   └── YYYY-MM-DD.json          # 每日数据文件
+├── videos/                      # YouTube 视频数据
+│   └── YYYY-MM-DD-videoId.json  # 视频数据文件
 ├── docs/
 │   └── superpowers/
 │       ├── specs/               # 设计文档
 │       └── plans/               # 实现计划
 └── .claude/
     └── skills/
-        └── follow-builders/     # 核心 skill
-            ├── SKILL.md         # Skill 定义
-            ├── scripts/
-            │   ├── fetch-local.js    # 本地数据获取
-            │   ├── prepare-digest.js # Digest 准备
-            │   └── deliver.js        # 推送发送
-            └── prompts/              # Digest 提示词
+        ├── follow-builders/     # 核心 skill
+        │   ├── SKILL.md         # Skill 定义
+        │   ├── scripts/
+        │   │   ├── fetch-local.js    # 本地数据获取
+        │   │   ├── prepare-digest.js # Digest 准备
+        │   │   └── deliver.js        # 推送发送
+        │   └── prompts/              # Digest 提示词
+        └── youtube-summary/     # YouTube 视频总结 skill
+            ├── skill.md         # Skill 定义
+            └── scripts/
+                └── fetch-youtube.js  # YouTube 字幕获取
 ```
 
 ## 数据结构
@@ -153,6 +161,64 @@ python3 -m http.server 8888
 ### 数据存储
 
 摘要保存到 `data/YYYY-MM-DD.json` 的 `podcasts[].summary` 字段中。
+
+## YouTube 视频总结
+
+### 触发方式
+
+在对话中发送：
+
+```
+帮我总结这个视频：https://www.youtube.com/watch?v=xxx
+```
+
+或简写：
+
+```
+总结视频 https://youtube.com/watch?v=xxx
+```
+
+### 依赖
+
+需要安装 yt-dlp：
+
+```bash
+# macOS
+brew install yt-dlp
+
+# 或 Python
+pip install yt-dlp
+```
+
+### 数据存储
+
+视频数据保存到 `videos/YYYY-MM-DD-videoId.json`：
+
+```json
+{
+  "videoId": "xxx",
+  "title": "视频标题",
+  "channel": "频道名称",
+  "subtitles": {
+    "type": "manual|auto",
+    "transcript": "字幕文本..."
+  },
+  "summary": {
+    "coreTopics": "...",
+    "keyPoints": [...],
+    "chapters": [...],
+    "resources": [...],
+    "highlights": [...],
+    "takeaways": [...]
+  }
+}
+```
+
+### 注意事项
+
+- 只保存字幕，不下载视频文件
+- 优先使用官方字幕，没有则使用自动生成字幕
+- 如果视频没有字幕，将无法生成摘要
 
 ## 内容过滤规则
 
