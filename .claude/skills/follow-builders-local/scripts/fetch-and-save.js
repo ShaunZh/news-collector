@@ -33,3 +33,65 @@ async function ensureDataDir() {
     await mkdir(DATA_DIR, { recursive: true });
   }
 }
+
+// ===================== FILTERING FUNCTIONS =====================
+
+function removeEmoji(str) {
+  // Remove emoji and emoji-related unicode ranges
+  return str.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+}
+
+const POLITENESS_PHRASES = [
+  'thanks', 'thank you', 'thx', 'ty',
+  'great', 'awesome', 'cool', 'nice', 'interesting',
+  'amazing', 'wonderful', 'excellent', 'good',
+  'yes', 'no', 'ok', 'okay', 'sure', 'agreed',
+  'congrats', 'congratulations', 'well done'
+];
+
+function isPolitenessOnly(text) {
+  const normalized = text.toLowerCase().trim().replace(/[!.?,]/g, '');
+  return POLITENESS_PHRASES.includes(normalized);
+}
+
+function hasLink(text) {
+  return text.includes('http://') || text.includes('https://') || text.includes('t.co');
+}
+
+function isSubstantiveTweet(tweet) {
+  const text = tweet.text || '';
+
+  // Filter 1: Too short without links
+  if (text.length < 20 && !hasLink(text)) {
+    return false;
+  }
+
+  // Filter 2: Pure emoji
+  const textWithoutEmoji = removeEmoji(text).trim();
+  if (textWithoutEmoji.length < 5 && !hasLink(text)) {
+    return false;
+  }
+
+  // Filter 3: Politeness only
+  if (isPolitenessOnly(text)) {
+    return false;
+  }
+
+  // Filter 4: Pure retweet without commentary
+  // (text is mostly RT @username or just a quote link)
+  if (text.startsWith('RT @') && text.length < 50) {
+    return false;
+  }
+
+  return true;
+}
+
+function filterTweets(tweets) {
+  return tweets.map(t => ({
+    ...t,
+    isSubstantive: isSubstantiveTweet(t)
+  }));
+}
+
+// Export for testing
+export { removeEmoji, isPolitenessOnly, hasLink, isSubstantiveTweet, filterTweets };
