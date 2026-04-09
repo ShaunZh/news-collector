@@ -1,3 +1,9 @@
 {
-  "videos": ["kwSVtQ7dziU"]
+  "videos": [
+    {
+      "videoId": "kwSVtQ7dziU",
+      "date": "2026-04-09",
+      "file": "2026-04-09-kwSVtQ7dziU.json"
+    }
+  ]
 }

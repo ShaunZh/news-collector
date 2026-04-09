@@ -229,12 +229,47 @@ async function main() {
   const outputFile = join(VIDEOS_DIR, `${today}-${videoId}.json`);
   await writeFile(outputFile, JSON.stringify(data, null, 2));
 
+  // Update video index
+  await updateVideoIndex(videoId);
+
   console.log(`Saved to: ${outputFile}`);
   console.log(`VIDEO_FILE:${outputFile}`);
   console.log(`TITLE:${data.title}`);
   console.log(`CHANNEL:${data.channel}`);
   console.log(`DURATION:${formatDuration(data.duration)}`);
   console.log(`SUBTITLE_TYPE:${subtitles.type}`);
+}
+
+async function updateVideoIndex(videoId) {
+  const indexPath = join(VIDEOS_DIR, 'index.json');
+  let index = { videos: [] };
+
+  // Read existing index
+  try {
+    if (existsSync(indexPath)) {
+      const content = await readFile(indexPath, 'utf8');
+      index = JSON.parse(content);
+    }
+  } catch {
+    // Index doesn't exist or is invalid, start fresh
+  }
+
+  // Check if video already in index
+  const exists = index.videos.some(v =>
+    typeof v === 'string' ? v === videoId : v.videoId === videoId
+  );
+
+  if (!exists) {
+    // Add video with metadata for easier frontend loading
+    const today = new Date().toISOString().split('T')[0];
+    index.videos.push({
+      videoId,
+      date: today,
+      file: `${today}-${videoId}.json`
+    });
+    await writeFile(indexPath, JSON.stringify(index, null, 2));
+    console.log('Updated video index');
+  }
 }
 
 async function findExistingVideo(videoId) {

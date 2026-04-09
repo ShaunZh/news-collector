@@ -55,42 +55,60 @@ async function loadAllData() {
 
 async function loadAllVideos() {
   try {
-    // Try to load videos from the last 30 days
-    const dates = [];
-    const today = new Date();
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      dates.push(date.toISOString().split('T')[0]);
+    // Load video index
+    const response = await fetch(`${VIDEOS_DIR}/index.json`);
+    if (response.ok) {
+      const index = await response.json();
+      const videoPromises = [];
+
+      for (const video of index.videos || []) {
+        // Support both old format (string) and new format (object)
+        const videoFile = typeof video === 'string'
+          ? video
+          : video.file;
+
+        videoPromises.push(
+          fetch(`${VIDEOS_DIR}/${videoFile}`)
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+        );
+      }
+
+      const results = await Promise.all(videoPromises);
+      allVideos = results.filter(v => v !== null).sort((a, b) =>
+        new Date(b.fetchedAt) - new Date(a.fetchedAt)
+      );
     }
 
-    const results = await Promise.all(dates.map(date => loadVideoFiles(date)));
-    allVideos = results.flat().sort((a, b) => new Date(b.fetchedAt) - new Date(a.fetchedAt));
     renderVideos();
     updateCountBadges();
   } catch (err) {
     console.error('Error loading videos:', err);
+    renderVideos();
   }
 }
 
 async function loadVideoFiles(date) {
   const videos = [];
-  // Try common video ID patterns (we don't know the video IDs, so we'll need to discover them)
-  // For now, we'll try to fetch from a manifest or scan
   try {
-    // Try loading a video index if it exists
+    // Load video index
     const response = await fetch(`${VIDEOS_DIR}/index.json`);
     if (response.ok) {
       const index = await response.json();
-      for (const videoId of index.videos || []) {
-        const videoResponse = await fetch(`${VIDEOS_DIR}/${date}-${videoId}.json`);
+      for (const video of index.videos || []) {
+        // Support both old format (string) and new format (object)
+        const videoFile = typeof video === 'string'
+          ? `${date}-${video}.json`
+          : video.file;
+
+        const videoResponse = await fetch(`${VIDEOS_DIR}/${videoFile}`);
         if (videoResponse.ok) {
           videos.push(await videoResponse.json());
         }
       }
     }
   } catch {
-    // No index file, videos will need to be loaded manually or through another mechanism
+    // No index file or error loading videos
   }
   return videos;
 }
